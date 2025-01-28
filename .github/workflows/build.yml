@@ -3,7 +3,7 @@ name: Auto Tag and Release
 on:
   push:
     branches:
-      - main-sylent-sys
+      - main
   workflow_dispatch:
 
 jobs:
