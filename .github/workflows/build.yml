@@ -17,7 +17,7 @@ jobs:
           echo "tag=$DATE_TAG" >> $GITHUB_OUTPUT
       - name: Skip Existing Tag
         run: |
-          if git ls-remote --tags origin ${{ steps.tag.outputs.tag }} | grep -q "${{ steps.tag.outputs.tag }}"; then
+          if git ls-remote --tags origin ${{ steps.tag.outputs.tag }} | grep "${{ steps.tag.outputs.tag }}"; then
             echo "Tag sudah ada, skip build."
             exit 1
           fi
