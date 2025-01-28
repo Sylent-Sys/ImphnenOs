@@ -44,7 +44,7 @@ jobs:
       - name: Publish Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.auto-tag.outputs.tag }}
+          tag_name: ${{ needs.auto-tag.outputs }}
           files: imphnenos.iso
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
