@@ -1,0 +1,50 @@
+name: Auto Tag and Release
+
+on:
+  push:
+    branches:
+      - main-sylent-sys
+  workflow_dispatch:
+
+jobs:
+  auto-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Tag from Date
+        id: tag
+        run: |
+          DATE_TAG=$(date -u +"%Y.%m.%d")
+          echo "tag=$DATE_TAG" >> $GITHUB_OUTPUT
+      - name: Create Git Tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const tag = '${{ steps.tag.outputs.tag }}';
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tag}`,
+              sha: context.sha
+            });
+  build-and-release:
+    needs: auto-tag
+    runs-on: ubuntu-latest
+    container: archlinux/base:latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build ISO
+        run: |
+          pacman -Syu --noconfirm archiso dos2unix
+          find releng/ -type f -exec dos2unix {} \;
+          mkarchiso -v -w ./work -o ./build ./releng
+          mv ./build/*.iso ./imphnenos.iso
+      - name: Publish Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.auto-tag.outputs }}
+          files: imphnenos.iso
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
